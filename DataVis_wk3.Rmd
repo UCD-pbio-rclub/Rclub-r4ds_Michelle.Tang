@@ -1,0 +1,280 @@
+---
+title: "R_Club_DataVis"
+author: "Michelle Tang"
+date: "4/24/2017"
+output: html_document
+---
+Exercises from 'R for Data Science', Data Visualization to end of 3.5.1.
+
+3.1.1
+
+Load tidyverse, install package if needed.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+3.2.1
+Do cars with big engines use more fuel than cars with small engines?
+
+```{r}
+mpg<-mpg
+head(mpg)
+```
+
+3.2.2 through 3.2.4
+
+Scatterplot
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy))
+```
+
+Graphing template
+ggplot(data = <DATA>) + <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+
+####3.2.4 Exercises
+
+1. ggplot(data = mpg)
+
+```{r}
+ggplot(data = mpg)
+```
+
+An empty field
+
+2. How many rows and columns in mtcar
+
+```{r}
+dim(mtcars)
+```
+
+3. Describe drv variable
+
+```{r}
+?mpg
+```
+
+f = front wheel drive
+r = rear wheel drive
+4 = 4wd
+
+4. Scatterplot of hwy vs cyl
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cyl))
+```
+
+5. Scatterplot class vs drv
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=class, y = drv))
+```
+
+Not useful as I don't see any trends or linear relationship.
+
+3.3 Aesthetic mapping
+```{r}
+ggplot(data = mpg) + geom_point(mapping=aes(x=displ, y=hwy, color = class))
+```
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+
+```
+
+```{r}
+# Left
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+```
+
+```{r}
+# Right
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+####3.3.1 Exercises
+1. What’s gone wrong with this code? Why are the points not blue?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+```
+
+The color of points isn't blue. The color = "blue" is inside aes() so tried to map aesthics to a variable called "blue" which doesn't exist.
+
+2. Which variables in mpg are categorical? Which continuous?
+```{r}
+str(mpg)
+```
+
+```{r}
+?mpg
+```
+
+Categorical: manufacturer, model, class, fl, drv, trans, year, cyl
+Continuous: cty, hwy, displ, year
+
+3. Map a continuous variable to color, size and shape. How does these aesthetics behave?
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, color = cty)) #continuous
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, color = drv)) #categorical
+```
+
+
+```{r}
+#ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, shape = cty)) #continuous
+```
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, shape = drv)) #categorical
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, size = cty)) #continuous
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, size = drv)) 
+```
+
+Color: Gradient for continuous, discrete aesthetics for categorical. 
+Size: Gradient for continous and categorical
+Shape: Error for continuous and discrete for categorical
+
+4. Map same variable to multiple aesthetics
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, color = cty, size = cty)) 
+```
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, color = drv, shape=drv)) 
+```
+
+Possbile. For categorical, multiple aesthetics can be mapped and given one legend. FOr continous, excluding shape, get two legends.
+
+5. What does stroke aesthetic do?
+```{r}
+?geom_point
+```
+
+To modify width of border for shapes that have a border.
+
+```{r}
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(shape = 21, colour = "black", fill = "white", size = 5, stroke = 5)
+```
+```{r}
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(shape = 21, colour = "black", fill = "white", size = 5)
+```
+
+6. What happens if you map aesthic to somethign other than a variable?
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping= aes(x=trans, y = hwy, color = displ < 5))
+```
+
+Becomes a boolean 
+
+3.5 Facets
+
+To split into subplots, categorical variables
+facet_wrap(~ <VARIABLE>)
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+Can facet by two variables 
+facet_grid(<VARIABLE1> ~ <VARIABLE2>)
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+####3.5.1 Exercises
+1. What happens if facet on a continuous variable?
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ hwy)
+```
+Makes each number in continuous variable into discrete category
+
+2. What do the empty cells in plot with facet_grid(drv ~ cyl) mean? How do they relate to this plot?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl))
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x=drv, y=cyl)) + facet_grid(drv~cyl)
+```
+Empty cells mean there is not data point for that coordinate of drv, cyl. The empty cells relate to the absence of data point in that coordinate.
+
+3. What plots does the following code make? What does . do?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+## scatterplot of displ versus hwy, faceted based on wheel drive
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+## scatterplot of disp versus hwy, faceted based on # of cyl
+```
+
+The . prevents faceting in row or columns dimension when faceting. From ?facet_grid: "the dot in the formula is used to indicate there should be no faceting on this dimension (either row or column)."
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ cyl)
+```
+
+but how is it different from below: if you ommit the .
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(~ cyl)
+```
+
+4. What are the advantages to using faceting instead of the colour aesthetic? What are the disadvantages? How might the balance change if you had a larger dataset?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+Adv: Less crowded, can look at data separated by subsetting
+Dis: Taken away from whole, hard to see how different subsets of data might be driving whole data trends
+More faceting as dataset gets larger
+
+5. Read ?facet_wrap
+```{r}
+?facet_wrap
+```
+
+nrow indicate number of rows for facets
+ncol indicate number of cols for facets
+
+facet_grid doesn't have nrow or ncol variables because that's pre-defined in the facetting variables for facets 
+
+6. When using facet_grid() you should usually put the variable with more unique levels in the columns. Why?
+
+Better use of screen space. Computer screens wider than they are tall.
