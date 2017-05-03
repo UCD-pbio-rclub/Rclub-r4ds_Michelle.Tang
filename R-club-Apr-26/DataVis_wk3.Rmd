@@ -61,7 +61,7 @@ r = rear wheel drive
 
 4. Scatterplot of hwy vs cyl
 
-```{r}
+```{r, fig.height=1, fig.width=3}
 ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cyl))
 ```
 
@@ -75,7 +75,11 @@ Not useful as I don't see any trends or linear relationship.
 
 3.3 Aesthetic mapping
 ```{r}
-ggplot(data = mpg) + geom_point(mapping=aes(x=displ, y=hwy, color = class))
+ggplot(data = mpg) + geom_point(mapping=aes(x=displ, y=hwy, color = class)) + theme
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping=aes(x=displ, y=hwy, color = class == "compact"))
 ```
 
 ```{r}
@@ -129,9 +133,8 @@ ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, color = drv)) #c
 ```
 
 
-```{r}
-#ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, shape = cty)) #continuous
-```
+`#ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, shape = cty)) #continuous
+`
 ```{r}
 ggplot(data = mpg) + geom_point(mapping = aes(x=displ, y = hwy, shape = drv)) #categorical
 ```
@@ -168,11 +171,11 @@ To modify width of border for shapes that have a border.
 
 ```{r}
 ggplot(mtcars, aes(wt, mpg)) +
-  geom_point(shape = 21, colour = "black", fill = "white", size = 5, stroke = 5)
+  geom_point(shape = 12, colour = "black", fill = "white", size = 5, stroke = 3)
 ```
 ```{r}
 ggplot(mtcars, aes(wt, mpg)) +
-  geom_point(shape = 21, colour = "black", fill = "white", size = 5)
+  geom_point(shape = 10, colour = "black", fill = "white", size = 5)
 ```
 
 6. What happens if you map aesthic to somethign other than a variable?
@@ -222,7 +225,7 @@ ggplot(data = mpg) +
 ```{r}
 ggplot(data = mpg) + geom_point(mapping = aes(x=drv, y=cyl)) + facet_grid(drv~cyl)
 ```
-Empty cells mean there is not data point for that coordinate of drv, cyl. The empty cells relate to the absence of data point in that coordinate.
+Empty cells mean there is not data point for that coordinate of drv, cyl. The empty cells relate to the absence of data point in that coordinate. Over plotting. Dots are sitting on top of each other.
 
 3. What plots does the following code make? What does . do?
 
@@ -278,3 +281,21 @@ facet_grid doesn't have nrow or ncol variables because that's pre-defined in the
 6. When using facet_grid() you should usually put the variable with more unique levels in the columns. Why?
 
 Better use of screen space. Computer screens wider than they are tall.
+
+
+Notes.
+
+Can greyout code chunk but not run it by using a flanking with a ` (back tick)
+Can specify the figure output size by the r chunk 
+Example
+```{r, fig.width=2, fig.height=4}
+ggplot()
+```
+
+
+can facet free and each will have its own 
+
+`facet_wrap(~class, scales=free)`
+
+can facet_wrap more than one variable
+`facet_wrap(~cyl + drv)`
