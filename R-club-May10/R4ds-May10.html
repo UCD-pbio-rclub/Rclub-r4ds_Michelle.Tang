@@ -688,6 +688,7 @@ select(flights, one_of(vars))</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for min_rank().</li>
 </ol>
+<pre class="r"><code>#min_rank(desc(flights$dep_delay)) #this gives you ranking</code></pre>
 <p>To handle ties, can use variation of min_rank(). min_rank has gaps in ranks for ties. Can use row_number or dense_rank</p>
 <ol start="5" style="list-style-type: decimal">
 <li>What does 1:3 + 1:10 return? Why?</li>

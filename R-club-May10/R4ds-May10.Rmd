@@ -208,7 +208,7 @@ delay_delay = dep_time - sched_dep_time
 
 4. Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for min_rank().
 
-```{r, echo=FALSE}
+```{r}
 #min_rank(desc(flights$dep_delay)) #this gives you ranking
 ```
 
