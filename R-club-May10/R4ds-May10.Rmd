@@ -1,0 +1,240 @@
+---
+title: "R4ds_May10"
+author: "Michelle Tang"
+date: "5/9/2017"
+output: html_document
+---
+
+##Data transformation
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+```{r}
+flights
+```
+
+**Five Key Functions**
+
+*Pick observations by their values (filter()).
+*Reorder the rows (arrange()).
+*Pick variables by their names (select()).
+*Create new variables with functions of existing variables (mutate()).
+*Collapse many values down to a single summary (summarise()).
+
+```{r}
+filter(flights, month==1, sched_dep_time==515)
+```
+
+For other types of combinations, you’ll need to use Boolean operators yourself: & is “and”, | is “or”, and ! is “not”.
+
+== versus near()
+near() is an approximation
+
+###5.2.4 Exercises
+
+1. Find all flights that
+
+  + Had an arrival delay of two or more hours
+  
+```{r}
+filter(flights, arr_delay >=120)
+```
+
+  + Flew to Houston (IAH or HOU)
+  
+```{r}
+filter(flights, dest=="IAH" | dest=="HOU")
+```
+
+  + Were operated by United, American, or Delta
+
+```{r}
+filter(flights, carrier == "UA" | carrier == "AA" | carrier =="DL")
+```
+
+  + Departed in summer (July, August, and September)
+  
+```{r}
+filter(flights, month %in% c(7,8,9))
+```
+
+  + Arrived more than two hours late, but didn’t leave late
+  
+```{r}
+filter(flights, arr_delay >= 120 & dep_delay <= 0)
+```
+
+  + Were delayed by at least an hour, but made up over 30 minutes in flight (not sure what the second half means)
+  
+```{r}
+filter(flights, dep_delay >= 60 & sched_arr_time-arr_time > 30)
+```
+
+  
+  + Departed between midnight and 6am (inclusive)
+  
+```{r}
+filter(flights, dep_time >= 0 & dep_time <= 600)
+```
+
+
+2. Another useful dplyr filtering helper is between(). What does it do? Can you use it to simplify the code needed to answer the previous challenges?
+
+includes values inside upper and lower boundaries.
+
+```{r}
+?between
+filter(flights, between(dep_time, 0, 600))
+```
+
+3. How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
+
+```{r}
+filter(flights, is.na(dep_time))
+```
+
+Other variables that are missing data is dep_delay, arr_time, arr_delay, air_time
+These might be canceled flights
+
+4. Why is NA ^ 0 not missing? Why is NA | TRUE not missing? Why is FALSE & NA not missing? Can you figure out the general rule? (NA * 0 is a tricky counterexample!)
+
+Because anything to the 0 power is 1
+Because NA | TRUE includes TRUE which is not missing
+FALSE, like NA is a logical object. 
+Input of logical object and NA with logical operators will return another logical object
+NA * 0 might not work because NA could be anything, not just a number and not a logical object
+
+###5.3.1 Exercises
+
+1. How could you use arrange() to sort all missing values to the start? (Hint: use is.na()).
+
+```{r}
+arrange(flights, desc(is.na(dep_time)))
+```
+
+
+2. Sort flights to find the most delayed flights. Find the flights that left earliest.
+
+```{r}
+arrange(flights, desc(dep_delay), dep_time)
+```
+
+3. Sort flights to find the fastest flights.
+
+```{r}
+arrange(flights, air_time)
+```
+
+4. Which flights travelled the longest? Which travelled the shortest?
+
+```{r}
+arrange(flights, desc(distance))
+arrange(flights, distance)
+```
+
+###5.4.1 Exercises
+
+1. Brainstorm as many ways as possible to select dep_time, dep_delay, arr_time, and arr_delay from flights.
+
+```{r}
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+select(flights, dep_time, dep_delay:arr_time, arr_delay)
+select(flights, -(year:day), -(sched_dep_time),-(sched_arr_time), -(carrier:time_hour))
+```
+
+2. What happens if you include the name of a variable multiple times in a select() call?
+
+```{r}
+select(flights, day, day, day)
+select(flights, carrier, day, carrier)
+```
+
+It gets selected only once.
+
+3. What does the one_of() function do? Why might it be helpful in conjunction with this vector?
+
+```{r}
+?one_of
+```
+
+Allows selecting variables contained in a character vector.
+
+```{r}
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+
+select(flights, one_of(vars))
+```
+
+
+4. Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default?
+
+```{r}
+select(flights, contains("TIME"))
+```
+
+By default, contains() ignores case in argument ignore.case = TRUE. Can change to FALSE if need to match case.
+
+###5.5.2 Exercises
+
+1. Currently dep_time and sched_dep_time are convenient to look at, but hard to compute with because they’re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+```{r}
+transmute(flights, dep_time, dep_midnight = dep_time %/% 100 * 60 + dep_time %% 100)
+transmute(flights, sched_dep_time, sched_dep_midnight = sched_dep_time %/% 100 * 60 + sched_dep_time %% 100)
+```
+
+
+2. Compare air_time with arr_time - dep_time. What do you expect to see? What do you see? What do you need to do to fix it?
+
+```{r}
+select(flights, air_time) 
+mutate(flights, arr_time - dep_time)
+```
+
+They don't equal to each other.
+To fix it, need to change arr_time and dep_time to minutes after minute and then substract.
+
+
+3. Compare dep_time, sched_dep_time, and dep_delay. How would you expect those three numbers to be related?
+
+```{r}
+select(flights, dep_time, sched_dep_time, dep_delay)
+```
+
+delay_delay = dep_time - sched_dep_time
+
+4. Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for min_rank().
+
+```{r, echo=FALSE}
+#min_rank(desc(flights$dep_delay)) #this gives you ranking
+```
+
+To handle ties, can use variation of min_rank(). min_rank has gaps in ranks for ties. Can use row_number or dense_rank
+
+5. What does 1:3 + 1:10 return? Why?
+
+```{r}
+#1:3 + 1:10
+```
+
+It cycles 1 through 3 and adds to 1 through 10 but it gives error because 10 isn't a mulitple of 3
+
+6. What trigonometric functions does R provide?
+
+```
+cos(x)
+sin(x)
+tan(x)
+
+acos(x)
+asin(x)
+atan(x)
+atan2(y, x)
+
+cospi(x)
+sinpi(x)
+tanpi(x)
+```
