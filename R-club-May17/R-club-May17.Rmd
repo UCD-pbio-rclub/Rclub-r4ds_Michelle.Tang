@@ -1,0 +1,188 @@
+---
+title: "R-club-May17"
+author: "Michelle Tang"
+date: "5/15/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nycflights13)
+```
+
+For May 17, we'll finish the 'Data transformation' sections (group summaries and group mutates) and the very brief 'Workflow: scripts' chapter.'
+
+### 5.6
+
+Grouped summaries with summarise()
+
+Pair it with group_by() is more useful
+
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+Combining multiple operations with pipe
+
+```{r}
+#code you might write with dplyr (which is now part of tidyverse)
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE)
+)
+delay <- filter(delay, count > 20, dest != "HNL")
+
+# It looks like delays increase with distance up to ~750 miles 
+# and then decrease. Maybe as flights get longer there's more 
+# ability to make up delays in the air?
+ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
+  geom_point(aes(size = count), alpha = 1/3) +
+  geom_smooth(se = FALSE)
+
+```
+
+```{r}
+#example using pipe "%>%"
+
+delays <- flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>% 
+  filter(count > 20, dest != "HNL")
+```
+
+```{r}
+#Are they the same?
+delays == delay
+
+#Yes
+```
+
+Missing values
+
+Use na.rm = True to remove missing values before computation
+
+Available wtih all aggregation functions
+
+Get a count of non-missing values sum(!(is.na(x)))
+
+```{r}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay)
+  )
+
+ggplot(data = delays, mapping = aes(x = delay)) + 
+  geom_freqpoly(binwidth = 10)
+```
+
+```{r}
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
+  geom_point(alpha = 1/10)
+```
+
+```{r}
+delays %>% 
+  filter(n > 25) %>% 
+  ggplot(mapping = aes(x = n, y = delay)) + 
+    geom_point(alpha = 1/10)
+```
+
+```{r}
+#install.packages("Lahman")
+#library(Lahman)
+batting <- as_tibble(Lahman::Batting)
+
+batters <- batting %>% 
+  group_by(playerID) %>% 
+  summarise(
+    ba = sum(H, na.rm = TRUE) / sum(AB, na.rm = TRUE),
+    ab = sum(AB, na.rm = TRUE)
+  )
+
+batters %>% 
+  filter(ab > 100) %>% 
+  ggplot(mapping = aes(x = ab, y = ba)) +
+    geom_point() + 
+    geom_smooth(se = FALSE)
+
+batters %>% arrange(desc(ba))
+```
+
+Useful summary functions
+
+**Measure of spread: sd(x), IQR(x), mad(x)**
+
+IQR() interquartile range
+
+mad(x) median absolute deviation
+
+**Measure of rank: min(x), quantile(x, 0.25), max(x)**
+
+quantile(x, 0.25) find values of x that is greater than 25%5 of the values and less thn the remaining 75%
+
+**Measures of position: first(x), nth(x,2), last(x)**
+
+similar to subset, e.g. x[1], x[length(x)]
+
+```{r}
+daily <- group_by(flights, year, month, day)
+(per_day   <- summarise(daily, flights = n()))
+per_month <- summarise(per_day, flights = sum(flights))
+per_year  <- summarise(per_month, flights = sum(flights))
+```
+
+
+### 5.6.7 Exercises
+
+1. Brainstorm at least 5 different ways to assess the typical delay characteristics of a group of flights. Consider the following scenarios:
+
+A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.
+
+```{r}
+flights %>% group_by(flight) %>% summarise(arrival=median(arr_delay)) %>% filter(arrival==-15)
+
+flights %>% group_by(flight) %>% summarise(arrival=median(arr_delay)) %>% filter(arrival==15)
+```
+
+
+A flight is always 10 minutes late.
+
+A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the time.
+
+99% of the time a flight is on time. 1% of the time it’s 2 hours late.
+
+Which is more important: arrival delay or departure delay?
+
+2. Come up with another approach that will give you the same output as not_cancelled %>% count(dest) and not_cancelled %>% count(tailnum, wt = distance) (without using count()).
+
+3. Our definition of cancelled flights (is.na(dep_delay) | is.na(arr_delay) ) is slightly suboptimal. Why? Which is the most important column?
+
+4. Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+
+5. Which carrier has the worst delays? Challenge: can you disentangle the effects of bad airports vs. bad carriers? Why/why not? (Hint: think about flights %>% group_by(carrier, dest) %>% summarise(n()))
+
+6. What does the sort argument to count() do. When might you use it?
