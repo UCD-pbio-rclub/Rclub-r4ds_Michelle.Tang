@@ -162,13 +162,6 @@ per_year  <- summarise(per_month, flights = sum(flights))
 
 A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.
 
-```{r}
-flights %>% group_by(flight) %>% summarise(arrival=median(arr_delay)) %>% filter(arrival==-15)
-
-flights %>% group_by(flight) %>% summarise(arrival=median(arr_delay)) %>% filter(arrival==15)
-```
-
-
 A flight is always 10 minutes late.
 
 A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the time.
@@ -177,12 +170,164 @@ A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the tim
 
 Which is more important: arrival delay or departure delay?
 
+Mean of delay time, median of delay time, spread (sd) of delay time, how flights rank in terms of delay time, .
+
 2. Come up with another approach that will give you the same output as not_cancelled %>% count(dest) and not_cancelled %>% count(tailnum, wt = distance) (without using count()).
+
+```{r}
+not_cancelled %>% count(dest)
+
+not_cancelled %>% group_by(dest) %>% summarise(n=n())
+
+not_cancelled %>% count(tailnum, wt = distance)
+
+not_cancelled %>% group_by(tailnum) %>% summarise(wt = sum(distance))
+```
+
 
 3. Our definition of cancelled flights (is.na(dep_delay) | is.na(arr_delay) ) is slightly suboptimal. Why? Which is the most important column?
 
+Longer to type. Could easily indicate cancelled flights as is.na(air_time)
+
 4. Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+
+```{r}
+cancel<-flights %>% group_by(month, day) %>% count()
+
+ggplot(cancel, mapping = aes(day, n)) + geom_point()
+
+canceldelay <- flights %>% mutate(cancelled = (is.na(air_time))) %>% group_by(month, day) %>% summarise(cancel = mean(cancelled), avg_delay = mean(dep_delay, na.rm = T))
+
+ggplot(canceldelay, aes(avg_delay, cancel)) + geom_point() + geom_smooth()
+```
+
+Weak positive relationship
 
 5. Which carrier has the worst delays? Challenge: can you disentangle the effects of bad airports vs. bad carriers? Why/why not? (Hint: think about flights %>% group_by(carrier, dest) %>% summarise(n()))
 
+```{r}
+flights %>% group_by(carrier, dest) %>% summarise(n())
+
+flights %>% group_by(carrier, dest) %>% summarise(dep=mean(dep_delay), arr=mean(arr_delay)) %>% arrange(desc(arr))
+
+delay_carr<-flights %>%
+  group_by(carrier) %>%
+  summarise(dep_delay=mean(dep_delay, na.rm=T),arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+
+delay_dest<-flights %>%
+  group_by(dest) %>%
+  summarise(dep_delay=mean(dep_delay, na.rm=T), arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+```
+
+F9 carrier has the worst delays
+
+Can disentangle bad carrier versus bad airports by comparing avg delay by carrier versus avg delay by dest. Those averages also don't correspond to delay calculated by carrier and dest
+
+
 6. What does the sort argument to count() do. When might you use it?
+
+```{r}
+?count
+```
+
+Sort, if true, will sort output in descending order of n. Might want to use it find max.
+
+```{r}
+flights %>% count(dest, sort=T)
+```
+
+
+
+### 5.7.1 Exercises
+
+1. Refer back to the lists of useful mutate and filtering functions. Describe how each operation changes when you combine it with grouping.
+
+Would apply to your defined group instead of over the entire df/tibble.
+
+2. Which plane (tailnum) has the worst on-time record?
+
+```{r}
+flights %>% group_by(tailnum) %>% summarise(arr_delay = mean(arr_delay, na.rm=T)) %>% arrange(desc(arr_delay))
+```
+
+N844MH worst on-time record.
+
+3. What time of day should you fly if you want to avoid delays as much as possible?
+
+```{r}
+flights %>% group_by(hour) %>% summarise(arr_delay = mean(arr_delay, na.rm=T)) %>% arrange(arr_delay)
+```
+
+Around 7 am.
+
+4. For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.
+
+```{r}
+flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% summarise(total = sum(arr_delay))
+
+flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% mutate(proportion = arr_delay/sum(arr_delay))
+
+```
+
+5. Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using lag() explore how the delay of a flight is related to the delay of the immediately preceding flight.
+
+```{r}
+lag_flights<-flights %>% group_by(month, day, hour) %>% filter(!is.na(arr_delay)) %>% mutate(lag_d=lag(dep_delay))
+
+ggplot(lag_flights, aes(dep_delay, lag_d)) + geom_point()
+```
+
+
+6. Look at each destination. Can you find flights that are suspiciously fast? (i.e. flights that represent a potential data entry error). Compute the air time a flight relative to the shortest flight to that destination. Which flights were most delayed in the air?
+
+Some of these questions are very confusing . . . compute air time a flight relative to shortest flight to that dest??
+
+```{r}
+flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% summarise(mean_air=mean(air_time)) %>% arrange(mean_air)
+```
+
+Flights to BDL, not surprising if it's in Connecticutt.
+
+
+```{r}
+flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% mutate(avg_air=mean(air_time), min_air=min(air_time), fast = air_time-min_air) %>% arrange(desc(fast))
+```
+
+
+7. Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.
+
+```{r}
+flights %>% group_by(dest) %>% count(carrier) %>% group_by(dest) %>% summarise(num_carrier=n()) %>% filter(num_carrier >= 2)
+```
+
+
+8. For each plane, count the number of flights before the first delay of greater than 1 hour.
+
+
+```{r}
+flights %>% arrange(month, day, tailnum) %>% group_by(tailnum) %>% mutate(hourlate = dep_delay > 60) %>% mutate(beforedelay = cumsum(hourlate)) %>% filter(beforedelay > 1) %>% count()
+```
+
+### 6.3 
+
+1. Go to the RStudio Tips twitter account, https://twitter.com/rstudiotips and find one tip that looks interesting. Practice using it!
+
+code snippets: https://rviews.rstudio.com/2017/03/03/february-17-tips-and-tricks/
+
+```{r}
+#template for r function is fun + Tab
+name <- function(variables) {
+  
+}
+```
+
+
+2. What other common mistakes will RStudio diagnostics report? Read https://support.rstudio.com/hc/en-us/articles/205753617-Code-Diagnostics to find out.
+
+Missing argument
+
+If variable not in scope
+
+If variable is defined but not used
