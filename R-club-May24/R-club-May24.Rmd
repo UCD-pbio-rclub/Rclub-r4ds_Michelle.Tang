@@ -309,28 +309,25 @@ If lower grade has better cuts. But data could be misleading if you're looking a
 
 3. Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
 
-```{r}
-install.packages("ggstance")
-library(ggstance)
-```
 
-```{r}
+```
 ggplot(mpg, aes(class, hwy, fill = factor(cyl))) +
-  geom_boxplot() +
+  ggstance::geom_boxplot() +
   coord_flip()
 
 ggplot(mpg, aes(hwy, class, fill = factor(cyl))) +
-  geom_boxploth()
+  ggstance::geom_boxploth()
 ```
 
 The position of the arguments for mapping is different. The legend for grouping changes position.
 
 4. One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
 
-```{r}
+```
 install.packages("lvplot", type = "source")
 library(lvplot)
-
+```
+```
 ggplot(diamonds, aes(x = cut, y = price)) +
   geom_lv()
 ```
@@ -394,6 +391,7 @@ flights %>% group_by(dest, month) %>% summarise(avg_delay = mean(dep_delay)) %>%
 
 Too many destinations. Too many missing values.
 
+Remove missing values. Should probably scale the dep_deplay time for comparison across dest or months.
 
 3. Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?
 
@@ -403,3 +401,15 @@ ggplot(data = diamonds) + geom_count(mapping = aes(x = color, y = cut))
 ```
 
 Actually don't know and don't know that there is a difference??
+
+## 7.5.3.1 Exercises
+
+Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?
+
+Visualise the distribution of carat, partitioned by price.
+
+How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?
+
+Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.
+
+Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.
