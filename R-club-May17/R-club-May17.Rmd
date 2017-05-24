@@ -162,11 +162,37 @@ per_year  <- summarise(per_month, flights = sum(flights))
 
 A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.
 
+```{r}
+flights %>% group_by(flight) %>% summarise(early = mean(arr_delay == -15)) %>% filter(early==1)
+
+flights %>% group_by(flight) %>% summarise(late = mean(arr_delay == 15)) %>% filter(late == 1)
+```
+
+
 A flight is always 10 minutes late.
+
+```{r}
+flights %>% group_by(flight) %>% summarise(late = mean(arr_delay==10)) %>% filter(late ==1)
+```
+
 
 A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the time.
 
+Same as first example
+
+```{r}
+flights %>% group_by(flight) %>% summarise(early=mean(arr_delay==-30)) %>% filter(early==1)
+
+flights %>% group_by(flight) %>% summarise(late=mean(arr_delay==30)) %>% filter(late==1)
+```
+
+
 99% of the time a flight is on time. 1% of the time it’s 2 hours late.
+
+```{r}
+
+```
+
 
 Which is more important: arrival delay or departure delay?
 
@@ -267,6 +293,7 @@ Around 7 am.
 ```{r}
 flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% summarise(total = sum(arr_delay))
 
+#need to group by carrier and flight
 flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% mutate(proportion = arr_delay/sum(arr_delay))
 
 ```
@@ -299,7 +326,7 @@ flights %>% filter(!(is.na(arr_delay))) %>% group_by(dest) %>% mutate(avg_air=me
 7. Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.
 
 ```{r}
-flights %>% group_by(dest) %>% count(carrier) %>% group_by(dest) %>% summarise(num_carrier=n()) %>% filter(num_carrier >= 2)
+flights %>% group_by(dest) %>% count(carrier) %>% summarise(num_carrier=n()) %>% filter(num_carrier >= 2)
 ```
 
 
@@ -307,7 +334,7 @@ flights %>% group_by(dest) %>% count(carrier) %>% group_by(dest) %>% summarise(n
 
 
 ```{r}
-flights %>% arrange(month, day, tailnum) %>% group_by(tailnum) %>% mutate(hourlate = dep_delay > 60) %>% mutate(beforedelay = cumsum(hourlate)) %>% filter(beforedelay > 1) %>% count()
+flights %>% arrange(month, day, tailnum) %>% group_by(tailnum) %>% mutate(hourlate = dep_delay > 60) %>% mutate(beforedelay = cumsum(hourlate)) %>% filter(beforedelay < 1) %>% count()
 ```
 
 ### 6.3 
