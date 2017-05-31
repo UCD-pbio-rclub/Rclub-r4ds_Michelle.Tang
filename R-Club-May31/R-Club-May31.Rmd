@@ -1,0 +1,255 @@
+---
+title: "R-Club-May31"
+author: "Michelle Tang"
+date: "5/30/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+## 7.6 Patterns and models
+
+```{r}
+ggplot(data = faithful) + 
+  geom_point(mapping = aes(x = eruptions, y = waiting))
+```
+
+Fits a model that predicts price from carat and computes the residuals (difference between the predicted value and actual value)
+
+```{r}
+library(modelr)
+
+mod <- lm(log(price) ~ log(carat), data = diamonds)
+
+diamonds2 <- diamonds %>% 
+  add_residuals(mod) %>% 
+  mutate(resid = exp(resid))
+
+ggplot(data = diamonds2) + 
+  geom_point(mapping = aes(x = carat, y = resid))
+```
+
+See residuals
+
+```{r}
+ggplot(data = diamonds2) + 
+  geom_boxplot(mapping = aes(x = cut, y = resid))
+```
+
+## 7.7 ggplot2 calls
+
+The first two arguments to `ggplot()` are `data` and `mapping`.
+
+The first two arguments to `aes()` are `x` and `y`.
+
+## 8 Workflow
+
+Best to consider your R scripts as the final product because it's easier to recreate the environment.
+
+Cmd + Shift + F10 to retart RStudio
+
+Cmd + Shift + S to rerun current script
+
+Don't use absolute paths because it hinders sharing. To address this problem, create new projects and then you can use relative paths.
+
+## 8.5 Summary
+
+In summary, RStudio projects give you a solid workflow that will serve you well in the future:
+
+* Create an RStudio project for each data analysis project.
+
+* Keep data files there; we’ll talk about loading them into R in data import.
+
+* Keep scripts there; edit them, run them in bits or as a whole.
+
+* Save your outputs (plots and cleaned data) there.
+
+* Only ever use relative paths, not absolute paths.
+
+Everything you need is in one place, and cleanly separated from all the other projects that you are working on.
+
+## Tibbles
+
+Creating tibbles
+
+```{r}
+as_tibble(iris)
+tibble(
+  x = 1:5, 
+  y = 1, 
+  z = x ^ 2 + y
+)
+```
+
+
+Non-syntactic names:
+
+Not starting with a letter or contain unusual characters like a space.
+
+Transposed tibble `tribble()`
+
+Column heading defined by formulas and entries are separated by commas.
+
+```{r}
+tribble(
+  ~x, ~y, ~z,
+  #--|--|----
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+```
+
+## 10.3 Tibbles vs data.frame
+
+Two main differences in usages of tibble vs classic data.frame: printing and subsetting
+
+Tibbles show only the first 10 rows and all the columns that fit on the screen and each column reports its type.
+
+Can control number of rows and width of display with `print()`
+
+```{r}
+nycflights13::flights %>% 
+  print(n = 10, width = Inf)
+```
+
+Control print behavior:
+
+Print n number of rows
+`options(tibble.print_max = n, tibble.print_min = m)`
+
+Always print all columns
+`options(tibble.width = Inf)`
+
+Subsetting: `$`, `[[]]`
+
+```{r}
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5)
+)
+
+# Extract by name
+df$x
+#> [1] 0.434 0.395 0.548 0.762 0.254
+df[["x"]]
+#> [1] 0.434 0.395 0.548 0.762 0.254
+
+# Extract by position
+df[[1]]
+```
+
+Combine with pipe:
+
+```{r}
+df %>% .$x
+#> [1] 0.434 0.395 0.548 0.762 0.254
+df %>% .[["x"]]
+#> [1] 0.434 0.395 0.548 0.762 0.254
+```
+
+To interaction with older code, turn tibble back to data frame with `as.data.frame()`
+
+## 10.5 Exercises
+
+1. How can you tell if an object is a tibble? (Hint: try printing mtcars, which is a regular data frame).
+
+You can print the object. If it is a tibble, it will only print the first 10 rows and n number of columns that will fit in a screen.
+
+2. Compare and contrast the following operations on a data.frame and equivalent tibble. What is different? Why might the default data frame behaviours cause you frustration?
+
+As a data.frame
+
+```{r}
+df <- data.frame(abc = 1, xyz = "a")
+df$x #this returns the value for xyz even though it's the wrong subset
+df[, "xyz"] #returns factor
+df[, c("abc", "xyz")] #returns the data frame
+```
+
+As a tibble
+
+```{r}
+df_t <- tibble(abc = 1, xyz = "a")
+df_t$x #gives warning/NULL
+df_t[, "xyz"] #returns a tibble
+df_t[, c("abc", "xyz")] #returns the tibble but xyz is chr instead of fctr
+``` 
+
+3. If you have the name of a variable stored in an object, e.g. var <- "mpg", how can you extract the reference variable from a tibble?
+
+```{r}
+var <- "xyz"
+
+df_t[[var]]
+```
+Double brackets
+
+4. Practice referring to non-syntactic names in the following data frame by:
+
+```{r}
+annoying <- tibble(
+  `1` = 1:10,
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+```
+
+Extracting the variable called 1.
+
+```{r}
+annoying[['1']]
+```
+
+
+Plotting a scatterplot of 1 vs 2.
+
+```{r}
+ggplot(annoying) + geom_point(aes(annoying[['1']], annoying[['2']]))
+```
+
+
+Creating a new column called 3 which is 2 divided by 1.
+
+```{r}
+annoying[['3']]<-annoying[['2']]/annoying[['1']]
+annoying
+```
+
+
+Renaming the columns to one, two and three.
+
+```{r}
+colnames(annoying)<-c("one","two","three")
+annoying
+```
+
+
+5. What does tibble::enframe() do? When might you use it?
+
+```{r}
+?tibble::enframe
+enframe(1:3)
+enframe(c(a = 5, b = 7))
+```
+
+Converts named atomic vectors or lists to two-column data frames. 
+
+6. What option controls how many additional column names are printed at the footer of a tibble?
+
+`tibble.max_extra_cols` Number of extra columns printed in reduced form.
+
+```{r}
+nycflights13::flights
+```
+
+```{r}
+options(tibble.max_extra_cols = 3)
+nycflights13::flights
+```
+
