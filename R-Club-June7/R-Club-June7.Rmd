@@ -1,0 +1,15 @@
+---
+title: "R-Club-June7"
+author: "Michelle Tang"
+date: "5/31/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
