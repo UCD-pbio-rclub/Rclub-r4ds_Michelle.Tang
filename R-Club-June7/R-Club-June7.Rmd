@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+<<<<<<< HEAD
 ## 11.2.2 Exercises
 
 1. What function would you use to read a file where fields were separated with
@@ -84,3 +85,5 @@ d5 <- "12/30/14" # Dec 30, 2014
 t1 <- "1705"
 t2 <- "11:15:10.12 PM"
 ```
+=======
+>>>>>>> origin/master
