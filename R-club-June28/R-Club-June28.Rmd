@@ -97,6 +97,10 @@ colnames(Fielding)
 Batting to Pitching: playerID, yearID, stint, teamID
 They share the same primary ID based on player, year and stint
 
+
+Julin's solution:
+package: datamodelr on github
+
 ### 13.4.6 Exercises
 
 1. Compute the average delay by destination, then join on the airports data frame so you can show the spatial distribution of delays. Here’s an easy way to draw a map of the United States:
@@ -205,7 +209,9 @@ semi_join(vehicles, common, by=c("make", "model"))
 Confusing about the 48 hour part
 
 ```{r}
-flights %>% group_by(month,day,hour) %>% summarise(delay=mean(arr_delay, na.rm=T)) %>% arrange(desc(delay)) %>% slice(1:48) %>% right_join(weather) #not sure where to go from here
+flights %>% group_by(month,day,hour) %>% summarise(delay=mean(arr_delay, na.rm=T)) %>% arrange(desc(delay))
+
+%>% left_join(weather) #not sure where to go from here
 ```
 
 
