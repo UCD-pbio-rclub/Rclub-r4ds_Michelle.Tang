@@ -1,0 +1,29 @@
+---
+title: "R-Club-July12"
+author: "Michelle Tang"
+date: "7/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+1) Section 14.1 and 14.2 in the book (and exercises)
+
+2) The tutorial on regular expression at https://regexone.com/
+
+3) The practice problems on regular expressions at https://regexone.com/problem/matching_decimal_numbers
+
+[OPTIONAL] The beginner crosswords at https://regexcrossword.com/  (See https://regexcrossword.com/howtoplay for how to play)
+
+4) 14.3.5 and its exercises
+
+(You can skip the other parts of 14.3, they are covered by the alternate material give above).
+
+If you a reference for regular expressions:
+
+in R type "?regexp" 
+
+Or https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf
