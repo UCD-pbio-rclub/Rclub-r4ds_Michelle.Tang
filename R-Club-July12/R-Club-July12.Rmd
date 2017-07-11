@@ -5,12 +5,81 @@ date: "7/7/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(tidyverse)
+library(stringr)
 ```
 
-
 1) Section 14.1 and 14.2 in the book (and exercises)
+
+### 14.2.5 Exercises
+
+1. In code that doesn’t use stringr, you’ll often see paste() and paste0(). What’s the difference between the two functions? What stringr function are they equivalent to? How do the functions differ in their handling of NA?
+
+paste and paste0 concatenate vectors after converting to character.
+
+paste default sep is a space whereas paste0 has no sep.
+
+The paste functions are similar to str_c(). str_c will skip the NA but paste() coerces NA character. In stringr, will have to specify str_replace_na()
+
+2. In your own words, describe the difference between the sep and collapse arguments to str_c().
+
+In sep, if pasting two vectors of string, will insert whatever sep is specified in between the two inputs as going through vector. I.e. if the two input vectors is sep by a character, the output will be the same length longest vector.
+
+In collapse, will insert whatever collapse is specified between each element in input vector, and make entire input vector into a single string. The output vector will include one element
+
+3. Use str_length() and str_sub() to extract the middle character from a string. What will you do if the string has an even number of characters?
+
+```{r}
+odd <-c("abcdefg")
+odd
+str_sub(odd, start = str_length(odd)/2+1, end = str_length(odd)/2+1)
+
+even <-c("abcdef")
+even
+#take both middle
+str_sub(even, start = str_length(even)/2, end = str_length(even)/2+1)
+
+# If I write it in a function
+str_ex<-function(x){
+  if(str_length(x) %% 2 ==0){
+    str_sub(x, start = str_length(x)/2, end = str_length(even)/2+1)
+  }
+  else{
+    str_sub(x, start = str_length(x)/2+1, end = str_length(x)/2+1)
+  }
+}
+```
+
+4. What does str_wrap() do? When might you want to use it?
+
+```{r}
+?str_wrap
+```
+
+I can see myself use it for multi-line labels
+
+breaks text into lines of specific widths and adds indents
+
+5. What does str_trim() do? What’s the opposite of str_trim()?
+
+Trim whitespace from start and end of string
+
+str_pad() adds whitespace
+
+6. Write a function that turns (e.g.) a vector c("a", "b", "c") into the string a, b, and c. Think carefully about what it should do if given a vector of length 0, 1, or 2.
+
+```{r}
+turn_vector <- function(x){
+  if(length(x) > 1){
+    str_c(x, collapse = ", ")
+  }
+  else{
+    print(x)
+  }
+}
+```
+
 
 2) The tutorial on regular expression at https://regexone.com/
 
