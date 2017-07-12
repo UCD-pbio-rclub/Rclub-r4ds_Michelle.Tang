@@ -287,6 +287,112 @@ Skip	I love cogs
 
 ### The practice problems on regular expressions at https://regexone.com/problem/matching_decimal_numbers
 
+Exercise 1: Matching Numbers
+
+Task	Text	 
+
+Match	3.14529	Success
+
+Match	-255.34	Success
+
+Match	128	Success
+
+Match	1.9e10	Success
+
+Match	123,340.00	Success
+
+Skip	720p	Failed
+
+`^-?\d+(,\d+)*(\.\d+(e\d+)?)?$`
+
+Exercise 2: Matching Phone Numbers
+
+Task	Text	Capture Groups	
+
+Capture	415-555-1234	415	Success
+
+Capture	650-555-2345	650	Success
+
+Capture	(416)555-3456	416	Success
+
+Capture	202 555 4567	202	Success
+
+Capture	4035555678	403	Success
+
+Capture	1 416 555 9292	416	Success
+
+`1?[\s-]?\(?(\d{3})\)?[\s-]?\d{3}[\s-]?\d{4}`
+
+Exercise 3: Matching Emails
+
+Task	Text	Capture Groups	 
+
+Capture	tom@hogwarts.com	tom	Success
+
+Capture	tom.riddle@hogwarts.com	tom.riddle	Success
+
+Capture	tom.riddle+regexone@hogwarts.com	tom.riddle	Success
+
+Capture	tom@hogwarts.eu.com	tom	Success
+
+Capture	potter@hogwarts.com	potter	Success
+
+Capture	harry@hogwarts.com	harry	Success
+
+Capture	hermione+regexone@hogwarts.com	hermione	Success
+
+`([\w\.]*)(\+regexone)?@hogwarts\.(eu\.)?com`
+
+`([\w\.]*)\D+`
+
+Exercise 4: Capturing HTML Tags
+
+Task	Text	Capture Groups	
+
+Capture	<a>This is a link</a>	a	Success
+
+Capture	<a href='https://regexone.com'>Link</a>	a	Success
+
+Capture	<div class='test_style'>Test</div>	div	Success
+
+Capture	<div>Hello <span>world</span></div>	div	Success
+
+`<(\w+)\D+`
+
+Exercise 5: Capturing Filename Data
+
+Task	Text	Capture Groups	 
+
+Skip	.bash_profile		To be completed
+
+Skip	workspace.doc		To be completed
+
+Capture	img0912.jpg	img0912 jpg	Success
+
+Capture	updated_img0912.png	updated_img0912 png	Success
+
+Skip	documentation.html		To be completed
+
+Capture	favicon.gif	favicon gif	Success
+
+Skip	img0912.jpg.tmp		To be completed
+
+Skip	access.lock		To be completed
+
+`^(\w+)\.(jpg|png|gif)$`
+
+Exercise 6: Matching Lines
+
+Task	Text	Capture Groups	 
+
+Capture				The quick brown fox...	The quick brown fox...	Success
+
+Capture	   jumps over the lazy dog.	jumps over the lazy dog.	Success
+
+`[\s]?(\w+\s\w+\s\w+\s\w+(\.(\.\.)?)?(\s\w+\.)?`
+
+
+
 
 
 [OPTIONAL] The beginner crosswords at https://regexcrossword.com/  (See https://regexcrossword.com/howtoplay for how to play)
