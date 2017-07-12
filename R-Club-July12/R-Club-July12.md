@@ -5,8 +5,30 @@ date: "7/7/2017"
 output: html_document
 ---
 
-```{r}
+
+```r
 library(tidyverse)
+```
+
+```
+## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr
+```
+
+```
+## Conflicts with tidy packages ----------------------------------------------
+```
+
+```
+## filter(): dplyr, stats
+## lag():    dplyr, stats
+```
+
+```r
 library(stringr)
 ```
 
@@ -30,16 +52,43 @@ In collapse, will insert whatever collapse is specified between each element in 
 
 3. Use str_length() and str_sub() to extract the middle character from a string. What will you do if the string has an even number of characters?
 
-```{r}
+
+```r
 odd <-c("abcdefg")
 odd
-str_sub(odd, start = str_length(odd)/2+1, end = str_length(odd)/2+1)
+```
 
+```
+## [1] "abcdefg"
+```
+
+```r
+str_sub(odd, start = str_length(odd)/2+1, end = str_length(odd)/2+1)
+```
+
+```
+## [1] "d"
+```
+
+```r
 even <-c("abcdef")
 even
+```
+
+```
+## [1] "abcdef"
+```
+
+```r
 #take both middle
 str_sub(even, start = str_length(even)/2, end = str_length(even)/2+1)
+```
 
+```
+## [1] "cd"
+```
+
+```r
 # If I write it in a function
 str_ex<-function(x){
   if(str_length(x) %% 2 ==0){
@@ -53,7 +102,8 @@ str_ex<-function(x){
 
 4. What does str_wrap() do? When might you want to use it?
 
-```{r}
+
+```r
 ?str_wrap
 ```
 
@@ -69,7 +119,8 @@ str_pad() adds whitespace
 
 6. Write a function that turns (e.g.) a vector c("a", "b", "c") into the string a, b, and c. Think carefully about what it should do if given a vector of length 0, 1, or 2.
 
-```{r}
+
+```r
 turn_vector <- function(x){
   if(length(x) > 1){
     str_c(x, collapse = ", ")
